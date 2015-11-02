@@ -1,0 +1,25 @@
+2015-10-15T01:23:51.179-0400 [initandlisten] MongoDB starting : pid=5085 port=27017 dbpath=./data 64-bit host=zhangsihaodeMacBook-Pro.local
+2015-10-15T01:23:51.179-0400 [initandlisten] 
+2015-10-15T01:23:51.179-0400 [initandlisten] ** WARNING: soft rlimits too low. Number of files is 256, should be at least 1000
+2015-10-15T01:23:51.179-0400 [initandlisten] db version v2.6.6
+2015-10-15T01:23:51.179-0400 [initandlisten] git version: nogitversion
+2015-10-15T01:23:51.179-0400 [initandlisten] build info: Darwin miniyosemite.local 14.0.0 Darwin Kernel Version 14.0.0: Fri Sep 19 00:26:44 PDT 2014; root:xnu-2782.1.97~2/RELEASE_X86_64 x86_64 BOOST_LIB_VERSION=1_49
+2015-10-15T01:23:51.179-0400 [initandlisten] allocator: tcmalloc
+2015-10-15T01:23:51.179-0400 [initandlisten] options: { net: { port: 27017 }, storage: { dbPath: "./data" }, systemLog: { destination: "file", path: "./log/log.log" } }
+2015-10-15T01:23:51.179-0400 [initandlisten] exception in initAndListen: 10296 
+*********************************************************************
+ ERROR: dbpath (./data) does not exist.
+ Create this directory or give existing directory in --dbpath.
+ See http://dochub.mongodb.org/core/startingandstoppingmongo
+*********************************************************************
+, terminating
+2015-10-15T01:23:51.179-0400 [initandlisten] dbexit: 
+2015-10-15T01:23:51.179-0400 [initandlisten] shutdown: going to close listening sockets...
+2015-10-15T01:23:51.179-0400 [initandlisten] shutdown: going to flush diaglog...
+2015-10-15T01:23:51.179-0400 [initandlisten] shutdown: going to close sockets...
+2015-10-15T01:23:51.180-0400 [initandlisten] shutdown: waiting for fs preallocator...
+2015-10-15T01:23:51.180-0400 [initandlisten] shutdown: lock for final commit...
+2015-10-15T01:23:51.180-0400 [initandlisten] shutdown: final commit...
+2015-10-15T01:23:51.180-0400 [initandlisten] shutdown: closing all files...
+2015-10-15T01:23:51.180-0400 [initandlisten] closeAllFiles() finished
+2015-10-15T01:23:51.180-0400 [initandlisten] dbexit: really exiting now

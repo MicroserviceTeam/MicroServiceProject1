@@ -1,0 +1,37 @@
+[{
+  "category": "students",
+  "server": "localhost:3004",
+  "start": "A",
+  "end": "H"
+},
+{
+  "category": "students",
+  "server": "localhost:3005",
+  "start": "I",
+  "end": "P"
+},
+{
+  "category": "students",
+  "server": "localhost:3006",
+  "start": "Q",
+  "end": "Z"
+},
+{
+  "category": "courses",
+  "server": "localhost:3001",
+  "start": "A",
+  "end": "H"
+},
+{
+  "category": "courses",
+  "server": "localhost:3002",
+  "start": "I",
+  "end": "P"
+},
+{
+  "category": "courses",
+  "server": "localhost:3003",
+  "start": "Q",
+  "end": "Z"
+}
+]
