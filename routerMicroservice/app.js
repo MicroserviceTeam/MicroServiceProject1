@@ -9,7 +9,55 @@ var routes = require('./routes/index');
 var users = require('./routes/user'); // main router
 var app = express();
 var db = mongo.db("mongodb://localhost:27017/userData", {native_parser:true});
-
+/*var collectionName = 'serverlist';
+var obj = {
+      "category": "students",
+      "server": "localhost",
+      "port": 3004,
+      "start": "A",
+      "end": "H"
+    };
+var obj2 = {
+      "category": "students",
+      "server": "localhost",
+      "port": 3005,
+      "start": "I",
+      "end": "P"
+    };
+var obj3 = {
+      "category": "students",
+      "server": "localhost",
+      "port": 3006,
+      "start": "Q",
+      "end": "Z"
+    };
+var obj4 = {
+      "category": "courses",
+      "server": "localhost",
+      "port": 3001,
+      "start": "A",
+      "end": "H"
+    };
+var obj5 = {
+      "category": "courses",
+      "server": "localhost",
+      "port": 3002,
+      "start": "I",
+      "end": "P"
+    };
+var obj6 = {
+      "category": "courses",
+      "server": "localhost",
+      "port": 3003,
+      "start": "Q",
+      "end": "Z"
+    };
+db.collection(collectionName).insert(obj, function (err, result) {})
+db.collection(collectionName).insert(obj2, function (err, result) {})
+db.collection(collectionName).insert(obj3, function (err, result) {})
+db.collection(collectionName).insert(obj4, function (err, result) {})
+db.collection(collectionName).insert(obj5, function (err, result) {})
+db.collection(collectionName).insert(obj6, function (err, result) {})*/
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
