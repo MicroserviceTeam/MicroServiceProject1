@@ -236,16 +236,17 @@ router.post('/coursesPartition/:splitChars/:key', function(req, res, next) {
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
                 '/course/repartition/'+req.params.key,
                 splitChars[index*2],splitChars[index*21],function(res2, data){
-                    var jsonObj=JSON.parse(data);
-                    for(var i=0,size=jsonObj.length;i<size;i++){
-                        var record=jsonObj[i];
-                        var server = config.find('courses', record.id[1]);
-                        var serverlist2 = server.split(':');
-                        sign.findforResendData(req, res2, serverlist2[0], serverlist2[1],'/course/teacher',record);
-                    }
-                });
+                var jsonObj=JSON.parse(data);
+                for(var i=0,size=jsonObj.length;i<size;i++){
+                    var record=jsonObj[i];
+                    var server = config.find('courses', record.id[1]);
+                    var serverlist2 = server.split(':');                   
+                    sign.findforResendData(req, res2, serverlist2[0], serverlist2[1],'/course/teacher',record);
+                }
+            });
         }
     }
+    res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 module.exports = router;
 
