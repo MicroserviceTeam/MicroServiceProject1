@@ -1,37 +1,37 @@
 [{
   "category": "students",
   "server": "localhost:3004",
-  "start": "A",
-  "end": "H"
+  "start": "0",
+  "end": "3"
 },
 {
   "category": "students",
   "server": "localhost:3005",
-  "start": "I",
-  "end": "P"
+  "start": "4",
+  "end": "6"
 },
 {
   "category": "students",
   "server": "localhost:3006",
-  "start": "Q",
-  "end": "Z"
+  "start": "7",
+  "end": "9"
 },
 {
   "category": "courses",
   "server": "localhost:3001",
-  "start": "A",
-  "end": "H"
+  "start": "0",
+  "end": "3"
 },
 {
   "category": "courses",
   "server": "localhost:3002",
-  "start": "I",
-  "end": "P"
+  "start": "4",
+  "end": "6"
 },
 {
   "category": "courses",
   "server": "localhost:3003",
-  "start": "Q",
-  "end": "Z"
+  "start": "7",
+  "end": "9"
 }
 ]

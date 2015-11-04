@@ -2,7 +2,7 @@ var fs=require('fs');
 
 var configFile = './config.json';
 exports.find = function(category,name) {
-    name = name.toUpperCase();
+    //name = name.toUpperCase();
     data = fs.readFileSync(configFile);
     var jsonObj=JSON.parse(data);
     

@@ -5,68 +5,80 @@ var config = require('../config');
 var mongo = require('mongoskin');
 
 router.get('/courses', function(req, res, next) {
+    router.get('/courses', function(req, res, next) {
     var outputs = '';
-	var servers = config.getServerList('courses');
+    var count = 0;
+    var servers = config.getServerList('courses');
     console.log(servers);
     for(var index = 0; index < servers.length; index++) {
-        /*var output='hehe';
         var serverlist = servers[index].split(':');
-        var outputss = sign.find(req, res, serverlist[0], serverlist[1], output);
-        console.log(output);
-        outputs += output;*/
-        var serverlist = servers[index].split(':');
-        sign.finds(req, res, serverlist[0], serverlist[1]);
+        sign.findwithCallback(req, res, serverlist[0], serverlist[1],
+        function(res2, data){
+            jsonObj = JSON.parse(data);
+            for(var i=0,size=jsonObj.length;i<size;i++){
+                var record=jsonObj[i];
+                outputs.push(record);
+            }
+            count++;
+            if (count == servers.length)
+                res.send(JSON.stringify(outputs));
+        });
     }
     //res.send(outputs);
 });
+});
 
-router.get('/courses/:name', function(req, res, next) {
-    var server = config.find('courses', req.params.name[0]);
+router.get('/courses/:id', function(req, res, next) {
+    var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/course', function(req, res, next) {
-    console.log(req.body.name);
-    var server = config.find('courses', req.body.name[0]);
+router.post('/course/:key', function(req, res, next) {
+    var server = config.find('courses', req.body.id[1]);
     console.log(server);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });
 
-router.post('/findCourses', function(req, res, next) {
+/*router.post('/findCourses', function(req, res, next) {
     var server = config.find('courses', req.body.name[0]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
-});
+});*/
 
-router.post('/addStudentToCourse', function(req, res, next) {
-    var server = config.find('courses', req.body.coursename[0]);
+router.put('/addStudentToCourse/:id/:key', function(req, res, next) {
+    var server = config.find('courses', req.body.courseid[1]);
     var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addStudentToCourse');
-    server = config.find('students', req.body.studentname[0]);
+    sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addStudentToCourse',function(response){
+        if response[]
+        var server = config.find('students', req.body.studentid[1]);
+        var serverlist = server.split(':');
+        var sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addCourseToStudent');
+    });
+    server = config.find('students', req.body.studentid[1]);
     serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addCourseToStudent');
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.put('/courses/:name', function(req, res, next) {
-    var server = config.find('courses', req.params.name[0]);
+router.put('/course/:id/:key', function(req, res, next) {
+    var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });
 
-router.delete('/courses/:name', function(req, res, next) {
-    var server = config.find('courses', req.params.name[0]);
+router.delete('/course/:id/:key', function(req, res, next) {
+    var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });
 
 router.delete('/deleteStudentFromCourse', function(req, res, next) {
-    var server = config.find('courses', req.body.coursename[0]);
+    var server = config.find('courses', req.body.courseid[1]);
     var serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], '/deleteStudentFromCourse');
-    server = config.find('students', req.body.studentname[0]);
+    server = config.find('students', req.body.studentid[1]);
     serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], '/deleteCourseFromStudent');
     res.send(JSON.stringify({ RET:200,status:"success" }));
@@ -74,17 +86,24 @@ router.delete('/deleteStudentFromCourse', function(req, res, next) {
 });
 
 router.get('/students', function(req, res, next) {
-    var outputs = '';
-    var output = '';
+    var outputs = Array();
+    var count = 0;
     var servers = config.getServerList('students');
+    console.log(servers);
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.find(req, res, serverlist[0], serverlist[1], output, function(res2, data){
-            
-        })
-        outputs += output;
+        sign.findwithCallback(req, res, serverlist[0], serverlist[1],
+        function(res2, data){
+            jsonObj = JSON.parse(data);
+            for(var i=0,size=jsonObj.length;i<size;i++){
+                var record=jsonObj[i];
+                outputs.push(record);
+            }
+            count++;
+            if (count == servers.length)
+                res.send(JSON.stringify(outputs));
+        });
     }
-    res.send(outputs);
 });
 
 router.get('/students/:name', function(req, res, next) {
@@ -93,7 +112,7 @@ router.get('/students/:name', function(req, res, next) {
     sign.find(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/students', function(req, res, next) {
+router.post('/student', function(req, res, next) {
     var server = config.find('students', req.body.name[0]);
     var serverlist = server.split(':');
     sign.find(req, res, serverlist[0], serverlist[1]);
