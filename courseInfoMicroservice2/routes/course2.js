@@ -6,6 +6,8 @@ var router = express.Router();
 var mongo = require('mongoskin');
 var db = mongo.db("mongodb://jingxiao:jingxiao@ds041154.mongolab.com:41154/course", {native_parser:true});
 var collectionName = "course2";
+var fs = require('fs');
+var logFile = './logfile.log'
 
 function getDateTime() {
 	var date = new Date();
@@ -81,6 +83,11 @@ router.post('/course/:key', function(req, res, next) {
 							res.send(JSON.stringify({ RET:500,status: "internal error"}));
 						}
 						else {
+							logs = JSON.stringify({id:req.body.id,oldData:"None",newData:JSON.stringify(obj),version:getDateTime()});
+							fs.appendFile(logFile, logs+"\n",
+                            function(err) {
+                                if(err) throw err;
+                            });
 							res.contentType('json');
 							res.send(JSON.stringify({ RET:200,status:"success"}));
 						}
@@ -102,10 +109,22 @@ router.put('/course/:id/:key', function(req, res, next) {
 	var id = req.params.id;
 	var body = req.body;
 	body["lastModifiedTime"] = getDateTime();
+	originData = '';
+	db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+		if (err) {
+			originData = "None.";
+		} else if (result.length == 0) {
+			originData = "None.";
+		}
+		else {
+			originData = result;
+		}
+	});
 	db.collection(collectionName).update(
 		{"id": id},
 		{$set: body},
 		function (err, result) {
+			console.log(JSON.stringify(result));
 			if (err) {
 				res.contentType('json');
 				res.send(JSON.stringify({RET: 500, status: "internal error"}));
@@ -115,6 +134,11 @@ router.put('/course/:id/:key', function(req, res, next) {
 				res.send(JSON.stringify({RET: 400, status: "course not found"}));
 			}
 			else {
+				logs = JSON.stringify({id:req.params.id,oldData:JSON.stringify(originData),newData:JSON.stringify(req.body),version:getDateTime()});
+				fs.appendFile(logFile, logs+"\n", 
+                function(err) {
+                    if(err) throw err;
+                });
 				res.contentType('json');
 				res.send(JSON.stringify({RET: 200, status: "success"}));
 			}
@@ -175,7 +199,19 @@ router.delete('/course/:id/:key', function(req, res, next) {
 		res.send("Must have teacher permission");
 		return;
 	}
+	originData = '';
+	db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+		if (err) {
+			originData = "None.";
+		} else if (result.length == 0) {
+			originData = "None.";
+		}
+		else {
+			originData = result;
+		}
+	});
 	db.collection(collectionName).remove({"id": req.params.id}, function (err, result) {
+		console.log(JSON.stringify(result));
 		if (err) {
 			res.contentType('json');
 			res.send(JSON.stringify({RET: 500, status: "internal error"}));
@@ -185,6 +221,11 @@ router.delete('/course/:id/:key', function(req, res, next) {
 			res.send(JSON.stringify({RET: 400, status: "course not found"}));
 		}
 		else {
+			logs = JSON.stringify({id:req.params.id,oldData:JSON.stringify(originData),newData:"None",version:getDateTime()});
+			fs.appendFile(logFile, logs+"\n",
+            function(err) {
+                if(err) throw err;
+            });
 			res.contentType('json');
 			res.send(JSON.stringify({RET: 200, status: "success"}));
 		}
