@@ -88,7 +88,7 @@ exports.finds = function(req,res,thost,tport) {
     req.write(contentStr);
     req.end();
 }
-exports.findSpecific = function(req,res,thost,tport,tpath,output) {
+exports.findSpecific = function(req,res,thost,tport,tpath) {
 
     var bodyQueryStr = req.body;
     console.log(bodyQueryStr);

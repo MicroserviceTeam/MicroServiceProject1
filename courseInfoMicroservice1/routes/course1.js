@@ -4,7 +4,7 @@
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongoskin');
-var db = mongo.db("mongodb://guest:guest@ds041154.mongolab.com:41154/course", {native_parser:true});
+var db = mongo.db("mongodb://jingxiao:jingxiao@ds041154.mongolab.com:41154/course", {native_parser:true});
 var collectionName = "course1";
 
 function getDateTime() {
@@ -36,6 +36,7 @@ router.post('/course/:key', function(req, res, next) {
 			if (err) {
 				res.contentType('json');
 				res.send(JSON.stringify({RET: 500, status: "internal error"}));
+                console.log(req.body.id);
 			}
 			else if (result.length != 0) {
 				res.contentType('json');
@@ -73,6 +74,7 @@ router.post('/course/:key', function(req, res, next) {
 						"open": open,
 						"lastModifiedTime": getDateTime()
 					};
+					console.log(obj);
 					db.collection(collectionName).insert(obj, function (err, result) {
 						if(err) {
 							res.contentType('json');
@@ -91,7 +93,7 @@ router.post('/course/:key', function(req, res, next) {
 });
 
 //modify a course's information
-router.put('/course/modify/:id/:key', function(req, res, next) {
+router.put('/course/:id/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "teacher") {
 		res.send("Must have teacher permission");
@@ -138,7 +140,7 @@ router.get('/courseByName/:name', function(req, res, next) {
 });
 
 //get a course's information by id
-router.get('/courseById/:id', function(req, res, next) {
+router.get('/courses/:id', function(req, res, next) {
 	db.collection(collectionName).find({'id': req.params.id}).toArray(function (err, result) {
 		if (err) {
 			res.contentType('json');
@@ -153,8 +155,21 @@ router.get('/courseById/:id', function(req, res, next) {
 	});
 });
 
+//get a course's list
+router.get('/courses', function(req, res, next) {
+	db.collection(collectionName).find().toArray(function (err, result) {
+		if (err) {
+			res.contentType('json');
+			res.send(JSON.stringify({RET: 500, status: "internal error"}));
+		} 
+		else {
+			res.json(result);
+		}
+	});
+});
+
 //delete a course by id
-router.delete('/courseById/:id/:key', function(req, res, next) {
+router.delete('/course/:id/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "teacher") {
 		res.send("Must have teacher permission");
@@ -315,7 +330,7 @@ router.put('/deleteStudentFromCourse/:id/:key', function(req, res, next) {
 });
 
 //change data model
-router.put('/course/changeModel/:key', function(req, res, next) {
+router.put('/addCourseAttribute/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "root") {
 		res.send("Must have root permission");
@@ -341,7 +356,7 @@ router.put('/course/changeModel/:key', function(req, res, next) {
 });
 
 //delete data model
-router.put('/course/deleteModel/:key', function(req, res, next) {
+router.put('/deleteCourseAttribute/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "root") {
 		res.send("Must have root permission");

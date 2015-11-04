@@ -155,6 +155,19 @@ router.get('/courses/:id', function(req, res, next) {
 	});
 });
 
+//get a course's list
+router.get('/courses', function(req, res, next) {
+	db.collection(collectionName).find().toArray(function (err, result) {
+		if (err) {
+			res.contentType('json');
+			res.send(JSON.stringify({RET: 500, status: "internal error"}));
+		} 
+		else {
+			res.json(result);
+		}
+	});
+});
+
 //delete a course by id
 router.delete('/course/:id/:key', function(req, res, next) {
 	var key = req.params.key;
@@ -317,7 +330,7 @@ router.put('/deleteStudentFromCourse/:id/:key', function(req, res, next) {
 });
 
 //change data model
-router.put('/course/changeModel/:key', function(req, res, next) {
+router.put('/addCourseAttribute/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "root") {
 		res.send("Must have root permission");
@@ -343,7 +356,7 @@ router.put('/course/changeModel/:key', function(req, res, next) {
 });
 
 //delete data model
-router.put('/course/deleteModel/:key', function(req, res, next) {
+router.put('/deleteCourseAttribute/:key', function(req, res, next) {
 	var key = req.params.key;
 	if (key != "root") {
 		res.send("Must have root permission");

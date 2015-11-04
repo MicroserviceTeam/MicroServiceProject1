@@ -5,7 +5,7 @@ var express = require('express');
 var async = require("async");
 var mongo = require('mongoskin');
 var router = express.Router();
-var db = mongo.db("mongodb://guest:guest@ds041144.mongolab.com:41144/student", {native_parser:true});
+var db = mongo.db("mongodb://jingxiao:jingxiao@ds041144.mongolab.com:41144/student", {native_parser:true});
 var collectionName = "student3";
 
 function getDateTime() {
@@ -28,8 +28,8 @@ function getDateTime() {
 //Add a new student
 router.post('/student/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     var addStudent = function() {
@@ -84,10 +84,10 @@ router.post('/student/:key', function(req, res, next) {
 });
 
 //modify a student's information
-router.put('/student/modify/:id/:key', function(req, res, next) {
+router.put('/student/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     var id = req.params.id;
@@ -133,7 +133,7 @@ router.get('/studentByName/:name', function(req, res, next) {
 });
 
 //get a student's information by id
-router.get('/studentById/:id', function(req, res, next) {
+router.get('/students/:id', function(req, res, next) {
     db.collection(collectionName).find({'id': req.params.id}).toArray(function (err, result) {
         if (err) {
             res.contentType('json');
@@ -148,11 +148,24 @@ router.get('/studentById/:id', function(req, res, next) {
     });
 });
 
+//get a student's list
+router.get('/students', function(req, res, next) {
+    db.collection(collectionName).find().toArray(function (err, result) {
+        if (err) {
+            res.contentType('json');
+            res.send(JSON.stringify({RET: 500, status: "internal error"}));
+        } 
+        else {
+            res.json(result);
+        }
+    });
+});
+
 //delete a student by id
-router.delete('/studentById/:id/:key', function(req, res, next) {
+router.delete('/student/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     db.collection(collectionName).remove({"id": req.params.id}, function (err, result) {
@@ -174,8 +187,8 @@ router.delete('/studentById/:id/:key', function(req, res, next) {
 //delete a student by name
 router.delete('/studentByName/:name/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     var name = req.params.name.trim().split(" ");
@@ -200,8 +213,8 @@ router.delete('/studentByName/:name/:key', function(req, res, next) {
 //add courses to students
 router.put('/addCourseToStudent/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     var addedCourses = req.body.courses.split(",");
@@ -254,8 +267,8 @@ router.put('/addCourseToStudent/:id/:key', function(req, res, next) {
 //delete courses from students
 router.put('/deleteCourseFromStudent/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "student") {
-        res.send("Must have student permission");
+    if (key != "teacher") {
+        res.send("Must have teacher permission");
         return;
     }
     var delCourses = req.body.courses.split(",");
@@ -312,7 +325,7 @@ router.put('/deleteCourseFromStudent/:id/:key', function(req, res, next) {
 });
 
 //change data model
-router.put('/student/changeModel/:key', function(req, res, next) {
+router.put('/addStudentAttribute/:key', function(req, res, next) {
     var key = req.params.key;
     if (key != "root") {
         res.send("Must have root permission");
@@ -338,7 +351,7 @@ router.put('/student/changeModel/:key', function(req, res, next) {
 });
 
 //delete data model
-router.put('/student/deleteModel/:key', function(req, res, next) {
+router.put('/deleteStudentAttribute/:key', function(req, res, next) {
     var key = req.params.key;
     if (key != "root") {
         res.send("Must have root permission");

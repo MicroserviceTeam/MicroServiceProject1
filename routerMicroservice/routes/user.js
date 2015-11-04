@@ -5,8 +5,7 @@ var config = require('../config');
 var mongo = require('mongoskin');
 
 router.get('/courses', function(req, res, next) {
-    router.get('/courses', function(req, res, next) {
-    var outputs = '';
+    var outputs = [];
     var count = 0;
     var servers = config.getServerList('courses');
     console.log(servers);
@@ -20,12 +19,12 @@ router.get('/courses', function(req, res, next) {
                 outputs.push(record);
             }
             count++;
+            console.log(count);
+            console.log('outputs: '+JSON.stringify(outputs));
             if (count == servers.length)
                 res.send(JSON.stringify(outputs));
         });
     }
-    //res.send(outputs);
-});
 });
 
 router.get('/courses/:id', function(req, res, next) {
@@ -50,12 +49,7 @@ router.post('/course/:key', function(req, res, next) {
 router.put('/addStudentToCourse/:id/:key', function(req, res, next) {
     var server = config.find('courses', req.body.courseid[1]);
     var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addStudentToCourse',function(response){
-        if response[]
-        var server = config.find('students', req.body.studentid[1]);
-        var serverlist = server.split(':');
-        var sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addCourseToStudent');
-    });
+    sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addStudentToCourse');
     server = config.find('students', req.body.studentid[1]);
     serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], '/addCourseToStudent');
@@ -106,76 +100,73 @@ router.get('/students', function(req, res, next) {
     }
 });
 
-router.get('/students/:name', function(req, res, next) {
-    var server = config.find('students', req.params.name[0]);
+router.get('/students/:id', function(req, res, next) {
+    console.log('haha');
+    var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
-    sign.find(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/student', function(req, res, next) {
-    var server = config.find('students', req.body.name[0]);
+router.post('/student/:key', function(req, res, next) {
+    var server = config.find('students', req.body.id[1]);
     var serverlist = server.split(':');
-    sign.find(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.put('/students/:name', function(req, res, next) {
-    var server = config.find('students', req.params.name[0]);
+router.put('/student/:id/:key', function(req, res, next) {
+    var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
-    sign.find(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.delete('/students/:name', function(req, res, next) {
-    var server = config.find('students', req.params.name[0]);
+router.delete('/student/:id/:key', function(req, res, next) {
+    var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
-    sign.find(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/findStudents', function(req, res, next) {
+/*router.post('/findStudents', function(req, res, next) {
     var server = config.find('students', req.body.name[0]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
-});
+});*/
 //DataModel change & Partition
-router.put('/studentsDataModel/:attribute', function(req, res, next) {
-    var attributeToadd = req.params.attribute;
+router.put('/addStudentAttribute/:key', function(req, res, next) {
+    var attributeToadd = req.body.attribute;
     var output = '';
     var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/studentsDataModel/'+attributeToadd);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/addStudentAttribute/'+req.params.key);
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.delete('/studentsDataModel/:attribute', function(req, res, next) {
-    var attributeToadd = req.params.attribute;
+router.put('/deleteStudentAttribute/:key', function(req, res, next) {
     var output = '';
     var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/studentsDataModel/'+attributeToadd);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/deleteStudentAttribute/'+req.params.key);
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
-router.put('/coursesDataModel/:attribute', function(req, res, next) {
-    var attributeToadd = req.params.attribute;
+router.put('/addCourseAttribute/:key', function(req, res, next) {
     var output = '';
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/coursesDataModel/'+attributeToadd);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/addCourseAttribute/'+req.params.key);
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.delete('/coursesDataModel/:attribute', function(req, res, next) {
+router.put('/deleteCourseAttribute/:key', function(req, res, next) {
     var output = '';
-    var attributeToadd = req.params.attribute;
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
-        console.log(serverlist[0]);
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/coursesDataModel/'+attributeToadd);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/deleteCourseAttribute/'+req.params.key);
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
@@ -197,8 +188,9 @@ router.post('/studentsPartition/:splitChars', function(req, res, next) {
         var list = new Array();
         var oriStart = config.getoriStart('students');
         var oriEnd = config.getoriEnd('students');
-        //config.setPartition('students',splitChars);
         var servers = config.getServerList('students');
+        config.setPartition('students',splitChars);
+        
         for(var index = 0; index < 1; index++) {
             var serverlist = servers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
@@ -234,8 +226,10 @@ router.post('/coursesPartition/:splitChars', function(req, res, next) {
         var list = new Array();
         var oriStart = config.getoriStart('courses');
         var oriEnd = config.getoriEnd('courses');
-        //config.setPartition('courses',splitChars);
         var servers = config.getServerList('courses');
+        
+        config.setPartition('courses',splitChars);
+        
         for(var index = 0; index <servers.length; index++) {
             var serverlist = servers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
