@@ -389,8 +389,6 @@ router.post('/course/repartition/:key', function(req, res, next) {
 		return;
 	}
 	var result = [];
-	var oriS = req.body.oriStart.toLowerCase();
-	var oriE = req.body.oriEnd.toLowerCase();
 	var newS = req.body.newStart.toLowerCase();
 	var newE = req.body.newEnd.toLowerCase();
 	var cursor = db.collection(collectionName).find();
@@ -399,8 +397,8 @@ router.post('/course/repartition/:key', function(req, res, next) {
 			async.each(array, function(data, callback) {
 				if (data == null) callback("err");
 				else {
-					var letter = data.name.substring(0, 1).toLowerCase();
-					if ((letter >= oriS && letter < newS) || (letter > newE && letter <= oriE)) {
+					var letter = data.id.substring(1, 2).toLowerCase();
+					if (letter < newS || letter > newE) {
 						result.push(data);
 					}
 					callback();
@@ -412,6 +410,18 @@ router.post('/course/repartition/:key', function(req, res, next) {
 		});
 	}
 	filter(function(err, result) {
+		for(var i=0;i<result.length;i++){
+			db.collection(collectionName).remove({"id": result[i].id}, function (err, results) {
+		        if (err) {
+			        console.log(JSON.stringify({RET: 500, status: "internal error"}));
+		        }
+		        else {
+			        console.log(JSON.stringify(results));
+		        }
+	        });
+		}
+		console.log('result: ');
+		console.log(JSON.stringify(result));
 		res.send(result);
 	});
 

@@ -176,32 +176,33 @@ router.get('/studentsPartition', function(req, res, next) {
     res.send(servers);
 });
 
-router.post('/studentsPartition/:splitChars', function(req, res, next) {
+router.post('/studentsPartition/:splitChars/:key', function(req, res, next) {
     var servers = config.getServerParitition('students');
     var splitChars = req.params.splitChars;
     var num = servers.length;
-    if (splitChars.length/2 > num)
-        res.send(JSON.stringify({ RET:400,status:"bad request" }));
-    else if (splitChars.length/2 < num)
-        res.send(JSON.stringify({ RET:400,status:"bad request" }));
+    if (splitChars.length/2.0 > num)
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The length should be twice as the number of available servers." }));
+    else if (splitChars.length/2.0 < num)
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The length should be twice as the number of available servers." }));
+    else if (splitChars[0] != '0' || splitChars[splitChars.length-1] != '9')
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The first should be 0 and the last should be 9." }));
     else {
         var list = new Array();
-        var oriStart = config.getoriStart('students');
-        var oriEnd = config.getoriEnd('students');
-        var servers = config.getServerList('students');
+        var studentservers = config.getServerList('students');
         config.setPartition('students',splitChars);
         
-        for(var index = 0; index < 1; index++) {
-            var serverlist = servers[index].split(':');
+        for(var index = 0; index < studentservers.length; index++) {
+            var serverlist = studentservers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
-                '/student/repartition',oriStart[index],oriEnd[index],
+                '/student/repartition/'+req.params.key,
                 splitChars[index*2],splitChars[index*2+1],function(res2, data){
                     var jsonObj=JSON.parse(data);
+                    console.log(JSON.stringify(jsonObj));
                     for(var i=0,size=jsonObj.length;i<size;i++){
                         var record=jsonObj[i];
-                        var server = config.find('students', record.name[0]);
+                        var server = config.find('students', record.id[1]);
                         var serverlist2 = server.split(':');
-                        sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/students',record);
+                        sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/student/teacher',record);
                     }
                 });
         }
@@ -214,33 +215,33 @@ router.get('/coursesPartition', function(req, res, next) {
     res.send(servers);
 });
 
-router.post('/coursesPartition/:splitChars', function(req, res, next) {
+router.post('/coursesPartition/:splitChars/:key', function(req, res, next) {
     var servers = config.getServerParitition('courses');
     var splitChars = req.params.splitChars;
     var num = servers.length;
-    if (splitChars.length > num)
-        res.send(JSON.stringify({ RET:400,status:"bad request" }));
-    else if (splitChars.length < num)
-        res.send(JSON.stringify({ RET:400,status:"bad request" }));
+    if (splitChars.length/2.0 > num)
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The length should be twice as the number of available servers." }));
+    else if (splitChars.length/2.0 < num)
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The length should be twice as the number of available servers." }));
+    else if (splitChars[0] != '0' || splitChars[splitChars.length-1] != '9')
+        res.send(JSON.stringify({ RET:400,status:"bad request",info:"The first should be 0 and the last should be 9." }));
     else {
         var list = new Array();
-        var oriStart = config.getoriStart('courses');
-        var oriEnd = config.getoriEnd('courses');
-        var servers = config.getServerList('courses');
-        
+        var courseservers = config.getServerList('courses');
+
         config.setPartition('courses',splitChars);
         
-        for(var index = 0; index <servers.length; index++) {
-            var serverlist = servers[index].split(':');
+        for(var index = 0; index <courseservers.length; index++) {
+            var serverlist = courseservers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
-                '/course/repartition',oriStart[index],oriEnd[index],
-                splitChars[index],splitChars[index+1],function(res2, data){
+                '/course/repartition/'+req.params.key,
+                splitChars[index*2],splitChars[index*21],function(res2, data){
                     var jsonObj=JSON.parse(data);
                     for(var i=0,size=jsonObj.length;i<size;i++){
                         var record=jsonObj[i];
-                        var server = config.find('courses', record.name[0]);
+                        var server = config.find('courses', record.id[1]);
                         var serverlist2 = server.split(':');
-                        sign.findforResendData(req, res2, serverlist2[0], serverlist2[1],'/courses',record);
+                        sign.findforResendData(req, res2, serverlist2[0], serverlist2[1],'/course/teacher',record);
                     }
                 });
         }

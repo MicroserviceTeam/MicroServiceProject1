@@ -69,11 +69,12 @@ exports.setPartition = function(category,splitChars) {
     var jsonObj=JSON.parse(data);
     var list = new Array();
     var j=0;
-    for(var i=0,size=jsonObj.length;i<size;i++){
+    var size=jsonObj.length;
+    for(var i=0;i<size;i++){
         var record=jsonObj[i];
         if (category == record['category'] ) {
             record['start'] = splitChars[j*2];
-            record['start'] = splitChars[j*2+1];
+            record['end'] = splitChars[j*2+1];
             list.push(record);
             j++;
         }

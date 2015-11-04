@@ -216,11 +216,9 @@ exports.findwithCallback = function(req,res,thost,tport,success) {
     req.end();
 }
 
-exports.findforPartition = function(req,res,thost,tport,tpath,oriStart,oriEnd,newStart,newEnd,success) {
+exports.findforPartition = function(req,res,thost,tport,tpath,newStart,newEnd,success) {
 
     var contentStr = querystring.stringify({
-        'oriStart' : oriStart,
-        'oriEnd': oriEnd,
         'newStart': newStart,
         'newEnd' : newEnd
     });
