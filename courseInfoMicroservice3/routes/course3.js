@@ -7,7 +7,8 @@ var mongo = require('mongoskin');
 var db = mongo.db("mongodb://jingxiao:jingxiao@ds041154.mongolab.com:41154/course", {native_parser:true});
 var collectionName = "course3";
 var fs = require('fs');
-var logFile = './logfile.log'
+var logFile = './logfile.log';
+var async = require('async');
 
 function getDateTime() {
 	var date = new Date();

@@ -8,7 +8,7 @@ var router = express.Router();
 var db = mongo.db("mongodb://jingxiao:jingxiao@ds041144.mongolab.com:41144/student", {native_parser:true});
 var collectionName = "student3";
 var fs = require('fs');
-var logFile = './logfile.log'
+var logFile = './logfile.log';
 
 function getDateTime() {
     var date = new Date();
@@ -30,8 +30,8 @@ function getDateTime() {
 //Add a new student
 router.post('/student/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "teacher") {
-        res.send("Must have teacher permission");
+    if (key != "student") {
+        res.send("Must have student permission");
         return;
     }
     var addStudent = function() {
@@ -93,8 +93,8 @@ router.post('/student/:key', function(req, res, next) {
 //modify a student's information
 router.put('/student/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "teacher") {
-        res.send("Must have teacher permission");
+    if (key != "student") {
+        res.send("Must have student permission");
         return;
     }
     var id = req.params.id;
@@ -187,8 +187,8 @@ router.get('/students', function(req, res, next) {
 //delete a student by id
 router.delete('/student/:id/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "teacher") {
-        res.send("Must have teacher permission");
+    if (key != "student") {
+        res.send("Must have student permission");
         return;
     }
     originData = '';
@@ -226,8 +226,8 @@ router.delete('/student/:id/:key', function(req, res, next) {
 //delete a student by name
 router.delete('/studentByName/:name/:key', function(req, res, next) {
     var key = req.params.key;
-    if (key != "teacher") {
-        res.send("Must have teacher permission");
+    if (key != "student") {
+        res.send("Must have student permission");
         return;
     }
     var name = req.params.name.trim().split(" ");
