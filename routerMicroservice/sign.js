@@ -88,7 +88,7 @@ exports.finds = function(req,res,thost,tport) {
     req.write(contentStr);
     req.end();
 }
-exports.findSpecific = function(req,res,thost,tport,tpath) {
+exports.findSpecific = function(req,res,thost,tport,tpath,success) {
 
     var bodyQueryStr = req.body;
     console.log(bodyQueryStr);
@@ -101,7 +101,7 @@ exports.findSpecific = function(req,res,thost,tport,tpath) {
     var opt = {
         host: thost,
         port: tport,
-        path: '/api'+tpath+'/'+req.params.id+'/'+req.params.key,
+        path: '/api'+tpath,
         method: req.method,
         headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -120,7 +120,7 @@ exports.findSpecific = function(req,res,thost,tport,tpath) {
             var dataStr = wholeData.toString('utf8');
 
             console.log('content ' + wholeData);
-            res.send(wholeData);
+            success(wholeData);
         });
     }).on('error', function(err) {
         console.log('error ' + err);
@@ -205,7 +205,7 @@ exports.findwithCallback = function(req,res,thost,tport,success) {
             var dataStr = wholeData.toString('utf8');
 
             console.log('content ' + wholeData);
-            success(httpRes,wholeData);
+            success(wholeData);
         });
     }).on('error', function(err) {
         console.log('error ' + err);
@@ -247,7 +247,7 @@ exports.findforPartition = function(req,res,thost,tport,tpath,newStart,newEnd,su
             var wholeData = Buffer.concat(buffers);
             var dataStr = wholeData.toString('utf8');
             //console.log(wholeData);
-            success(httpRes,wholeData);
+            success(wholeData);
             //res.send(wholeData);
         });
     }).on('error', function(err) {
