@@ -26,107 +26,78 @@ function getDateTime() {
     return hour + ":" + min + ":" + sec + " " + month + "/" + day + "/" + year;
 }
 
-
-//add a new course or data partition
-router.post('/courses', function(req, res, next) {
-    if (req.body.operation == "addCourse")
-        addCourse(req, res, next);
-    if (req.body.operation == "partition")
-        partition(req, res, next);
-});
-
-
-//modify a course's information or add students to courses
-router.put('/courses/:id', function(req, res, next) {
-    if (req.body.operation == "modify")
-        modify(req, res, next);
-    if (req.body.operation == "addStudentToCourse")
-        addStudentsToCourse(req, res, next);
-});
-
-//delete course or delete students from courses
-router.delete('/course/:id', function(req, res, next) {
-    if (req.body.operation == "deleteCourse")
-        deleteCourse(req, res, next);
-    if (req.body.operation == "deleteStudentFromCourse")
-        deleteStudentFromCourse(req, res, next);
-});
-
 //Add a new course
-function addCourse(req, res, next) {
-    var addCourse = function () {
-        db.collection(collectionName).find({"id": req.body.id}).toArray(function (err, result) {
-            if (err) {
-                res.contentType('json');
-                res.send(JSON.stringify({RET: 500, status: "internal error"}));
-                console.log(req.body.id);
-            }
-            else if (result.length != 0) {
-                res.contentType('json');
-                res.send(JSON.stringify({RET: 400, status: "course already exist"}));
+router.post('/courses', function (req, res, next) {
+    db.collection(collectionName).find({"id": req.body.id}).toArray(function (err, result) {
+        if (err) {
+            res.contentType('json');
+            res.send(JSON.stringify({RET: 500, status: "internal error"}));
+            console.log(req.body.id);
+        }
+        else if (result.length != 0) {
+            res.contentType('json');
+            res.send(JSON.stringify({RET: 400, status: "course already exist"}));
+        }
+        else {
+            var id = req.body.id;
+            var name = req.body.name;
+            var location = req.body.location;
+            var desc = req.body.desc;
+            var stu = req.body.stu;
+            var credit = req.body.credit;
+            var time = req.body.time;
+            var approval = req.body.approval;
+            var instructor = req.body.instructor;
+            var website = req.body.website;
+            var dept = req.body.dept;
+            var open = req.body.open;
+            if (id == null || name == null) {
+                res.send(JSON.stringify({ RET:402,status:"wrong JSON format" }));
             }
             else {
-                var id = req.body.id;
-                var name = req.body.name;
-                var location = req.body.location;
-                var desc = req.body.desc;
-                var stu = req.body.stu;
-                var credit = req.body.credit;
-                var time = req.body.time;
-                var approval = req.body.approval;
-                var instructor = req.body.instructor;
-                var website = req.body.website;
-                var dept = req.body.dept;
-                var open = req.body.open;
-                if (id == null || name == null) {
-                    res.send(JSON.stringify({ RET:402,status:"wrong JSON format" }));
-                }
-                else {
-                    var obj = {
-                        "id": id,
-                        "name": name,
-                        "location": location,
-                        "desc": desc,
-                        "stu": stu,
-                        "credit": credit,
-                        "time": time,
-                        "approval": approval,
-                        "instructor": instructor,
-                        "website": website,
-                        "dept": dept,
-                        "open": open,
-                        "lastModifiedTime": getDateTime()
-                    };
-                    console.log(obj);
-                    db.collection(collectionName).insert(obj, function (err, result) {
-                        if(err) {
-                            res.contentType('json');
-                            res.send(JSON.stringify({ RET:500,status: "internal error"}));
-                        }
-                        else {
-                            logs = JSON.stringify({id:req.body.id,oldData:"None",newData:JSON.stringify(obj),version:getDateTime()});
-                            fs.appendFile(logFile, logs+"\n",
-                                function(err) {
-                                    if(err) throw err;
-                                });
-                            res.contentType('json');
-                            res.send(JSON.stringify({ RET:200,status:"success"}));
-                        }
-                    })
-                }
+                var obj = {
+                    "id": id,
+                    "name": name,
+                    "location": location,
+                    "desc": desc,
+                    "stu": stu,
+                    "credit": credit,
+                    "time": time,
+                    "approval": approval,
+                    "instructor": instructor,
+                    "website": website,
+                    "dept": dept,
+                    "open": open,
+                    "lastModifiedTime": getDateTime()
+                };
+                console.log(obj);
+                db.collection(collectionName).insert(obj, function (err, result) {
+                    if(err) {
+                        res.contentType('json');
+                        res.send(JSON.stringify({ RET:500,status: "internal error"}));
+                    }
+                    else {
+                        logs = JSON.stringify({id:req.body.id,oldData:"None",newData:JSON.stringify(obj),version:getDateTime()});
+                        fs.appendFile(logFile, logs+"\n",
+                            function(err) {
+                                if(err) throw err;
+                            });
+                        res.contentType('json');
+                        res.send(JSON.stringify({ RET:200,status:"success"}));
+                    }
+                })
             }
-        });
-    }
-    addCourse();
-}
+        }
+    });
+});
 
 //modify a course's information
-function modify(req, res, next) {
-    var id = req.params.id;
+router.put('/courses/:cid', function (req, res, next) {
+    var id = req.params.cid;
     var body = req.body;
     body["lastModifiedTime"] = getDateTime();
     var originData = '';
-    db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+    db.collection(collectionName).find({"id": req.params.cid}).toArray(function (err, result) {
         if (err) {
             originData = "None.";
         } else if (result.length == 0) {
@@ -150,7 +121,7 @@ function modify(req, res, next) {
                 res.send(JSON.stringify({RET: 400, status: "course not found"}));
             }
             else {
-                logs = JSON.stringify({id:req.params.id,oldData:JSON.stringify(originData),newData:JSON.stringify(req.body),version:getDateTime()});
+                logs = JSON.stringify({id:req.params.cid,oldData:JSON.stringify(originData),newData:JSON.stringify(req.body),version:getDateTime()});
                 fs.appendFile(logFile, logs+"\n",
                     function(err) {
                         if(err) throw err;
@@ -159,12 +130,12 @@ function modify(req, res, next) {
                 res.send(JSON.stringify({RET: 200, status: "success"}));
             }
         });
-}
+});
 
 
 //get a course's information by id
-router.get('/courses/:id', function(req, res, next) {
-    db.collection(collectionName).find({'id': req.params.id}).toArray(function (err, result) {
+router.get('/courses/:cid', function(req, res, next) {
+    db.collection(collectionName).find({'id': req.params.cid}).toArray(function (err, result) {
         if (err) {
             res.contentType('json');
             res.send(JSON.stringify({RET: 500, status: "internal error"}));
@@ -192,9 +163,9 @@ router.get('/courses', function(req, res, next) {
 });
 
 //delete a course
-function deleteCourse(req, res, next) {
+router.delete('/courses/:cid', function (req, res, next) {
     var originData = '';
-    db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+    db.collection(collectionName).find({"id": req.params.cid}).toArray(function (err, result) {
         if (err) {
             originData = "None.";
         } else if (result.length == 0) {
@@ -204,7 +175,7 @@ function deleteCourse(req, res, next) {
             originData = result;
         }
     });
-    db.collection(collectionName).remove({"id": req.params.id}, function (err, result) {
+    db.collection(collectionName).remove({"id": req.params.cid}, function (err, result) {
         console.log(JSON.stringify(result));
         if (err) {
             res.contentType('json');
@@ -215,7 +186,7 @@ function deleteCourse(req, res, next) {
             res.send(JSON.stringify({RET: 400, status: "course not found"}));
         }
         else {
-            logs = JSON.stringify({id:req.params.id,oldData:JSON.stringify(originData),newData:"None",version:getDateTime()});
+            logs = JSON.stringify({id:req.params.cid,oldData:JSON.stringify(originData),newData:"None",version:getDateTime()});
             fs.appendFile(logFile, logs+"\n",
                 function(err) {
                     if(err) throw err;
@@ -224,18 +195,19 @@ function deleteCourse(req, res, next) {
             res.send(JSON.stringify({RET: 200, status: "success"}));
         }
     });
-}
+});
+
 
 
 //add students to courses
-function addStudentsToCourse(req, res, next) {
-    var addedStudents = req.body.stu.split(",");
-    if (req.params.id == null || addedStudents == null) {
+router.post('/courses/:cid/students/:sid', function(req, res, next) {
+    var addedStudents = req.body.sid;
+    if (req.params.cid == null || addedStudents == null) {
         res.send(JSON.stringify({RET: 402, status: "wrong JSON format"}));
         return;
     }
     var findStudent = function (callback) {
-        db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+        db.collection(collectionName).find({"id": req.params.cid}).toArray(function (err, result) {
             if (err) {
                 res.contentType('json');
                 res.send(JSON.stringify({RET: 500, status: "internal error"}));
@@ -256,7 +228,7 @@ function addStudentsToCourse(req, res, next) {
                 oriStudents.push(addedStudents[i]);
         }
         db.collection(collectionName).update(
-            {"id": req.params.id},
+            {"id": req.params.cid},
             {
                 $set: {
                     "stu": oriStudents.toString(),
@@ -274,18 +246,18 @@ function addStudentsToCourse(req, res, next) {
                 }
             });
     });
-}
+});
 
 
 //delete students from courses
-function deleteStudentFromCourse(req, res, next) {
-    var delStudents = req.body.stu.split(",");
-    if (req.params.id == null || delStudents == null) {
+router.delete('/courses/:cid/students/:sid', function (req, res, next) {
+    var delStudents = req.body.sid;
+    if (req.params.cid == null || delStudents == null) {
         res.send(JSON.stringify({ RET:402,status:"wrong JSON format" }));
         return;
     }
     var findStudent = function (callback) {
-        db.collection(collectionName).find({"id": req.params.id}).toArray(function (err, result) {
+        db.collection(collectionName).find({"id": req.params.cid}).toArray(function (err, result) {
             if (err) {
                 res.contentType('json');
                 res.send(JSON.stringify({RET: 500, status: "internal error"}));
@@ -311,7 +283,7 @@ function deleteStudentFromCourse(req, res, next) {
             if (index != -1)
                 oriStudents.splice(index, 1);
         }
-        db.collection(collectionName).update({"id": req.params.id},
+        db.collection(collectionName).update({"id": req.params.cid},
             {
                 $set: {
                     "stu": oriStudents.toString(),
@@ -330,10 +302,10 @@ function deleteStudentFromCourse(req, res, next) {
             }
         );
     })
-}
+});
 
 //change data model
-router.put('/courses', function(req, res, next) {
+router.post('/courses/models', function(req, res, next) {
     var body = req.body;
     body["lastModifiedTime"] = getDateTime();
     db.collection(collectionName).update(
@@ -354,7 +326,7 @@ router.put('/courses', function(req, res, next) {
 });
 
 //delete data model
-router.delete('/courses', function(req, res, next) {
+router.delete('/courses/models', function(req, res, next) {
     var body = req.body;
     body["lastModifiedTime"] = getDateTime();
     db.collection(collectionName).update(
@@ -375,7 +347,7 @@ router.delete('/courses', function(req, res, next) {
 });
 
 //data partition
-function partition(req, res, next) {
+router.put('/courses/partitions', function (req, res, next) {
     var result = [];
     var newS = req.body.newStart.toLowerCase();
     var newE = req.body.newEnd.toLowerCase();
@@ -412,7 +384,7 @@ function partition(req, res, next) {
         console.log(JSON.stringify(result));
         res.send(result);
     });
-}
+});
 
 
 //server status and number of elements in DB
