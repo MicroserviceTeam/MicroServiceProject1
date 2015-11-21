@@ -5,10 +5,10 @@ var config = require('../config');
 var mongo = require('mongoskin');
 
 router.get('/courses', function(req, res, next) {
+    config.Partition('courses');
     var outputs = [];
     var count = 0;
     var servers = config.getServerList('courses');
-    console.log(servers);
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
         sign.findwithCallback(req, res, serverlist[0], serverlist[1],
@@ -19,8 +19,6 @@ router.get('/courses', function(req, res, next) {
                 outputs.push(record);
             }
             count++;
-            console.log(count);
-            console.log('outputs: '+JSON.stringify(outputs));
             if (count == servers.length)
                 res.send(JSON.stringify(outputs));
         });
@@ -28,20 +26,17 @@ router.get('/courses', function(req, res, next) {
 });
 
 router.get('/courses/:id', function(req, res, next) {
+    config.Partition('courses');
     var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/course/:key', function(req, res, next) {
-	if (req.params.key != 'teacher'){
-		res.send(JSON.stringify({ RET:500,status:"Must have teacher permission" }));
-		return;
-	}
-    var server = config.find('courses', req.body.id[1]);
-    console.log(server);
+router.put('/courses/:id', function(req, res, next) {
+    config.Partition('courses');
+    var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0],serverlist[1]);
+    sign.finds(req,res,serverlist[0], serverlist[1]);
 });
 
 /*router.post('/findCourses', function(req, res, next) {
@@ -50,30 +45,34 @@ router.post('/course/:key', function(req, res, next) {
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });*/
 
-router.put('/addStudentToCourse/:key', function(req, res, next) {
-	if (req.params.key != 'teacher'){
-		res.send(JSON.stringify({ RET:500,status:"Must have teacher permission" }));
-		return;
-	}
-    var server = config.find('students', req.body.stu[1]);
+router.post('/courses', function(req, res, next) {
+    config.Partition('courses');
+    var server = config.find('courses', req.body.id[1]);
     var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], 
-	'/addCourseToStudent/'+req.body.stu+'/'+req.params.key,
+    sign.finds(req,res,serverlist[0],serverlist[1]);
+});
+
+router.post('/courses/:cid/students/:sid', function(req, res, next) {
+    config.Partition('courses');
+    var server = config.find('students', req.params.sid[1]);
+    var serverlist = server.split(':');
+    sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
+	'/students/'+req.params.sid+'/courses/'+req.params.cid,
 	function(data){
 		var jsonObj=JSON.parse(data);
 		if ("RET" in jsonObj && jsonObj["RET"]==200) {
 			server = config.find('courses', req.body.courses[1]);
 			serverlist = server.split(':');
-			sign.findSpecific(req, res, serverlist[0], serverlist[1],
-			'/addStudentToCourse/'+req.body.courses+'/'+req.params.key,
+			sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
+			'/courses/'+req.params.cid+'/students/'+req.params.sid,
 			function(data1){
 				var jsonObj1=JSON.parse(data1);
 				if ("RET" in jsonObj1 && jsonObj["RET"]==200) {
 					res.send(JSON.stringify({ RET:200,status:"success" }));
 				}
 				else {
-					sign.findSpecific(req, res, serverlist[0], serverlist[1], 
-					'/deleteCourseFromStudent/'+req.body.stu+'/'+req.params.key,
+					sign.findSpecific(req, res, serverlist[0], serverlist[1], 'DELETE', 
+					'/students/'+req.params.sid+'/courses/'+req.params.cid,
 					function(newdata){
 						res.send(data1);
 					});
@@ -87,65 +86,59 @@ router.put('/addStudentToCourse/:key', function(req, res, next) {
 	});
 });
 
-router.put('/course/:id/:key', function(req, res, next) {
-	if (req.params.key != 'teacher'){
-		res.send(JSON.stringify({ RET:500,status:"Must have teacher permission" }));
-		return;
-	}
+router.delete('/courses/:id', function(req, res, next) {
+    config.Partition('courses');
     var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });
 
-router.delete('/course/:id/:key', function(req, res, next) {
-	if (req.params.key != 'teacher'){
-		res.send(JSON.stringify({ RET:500,status:"Must have teacher permission" }));
-		return;
-	}
-    var server = config.find('courses', req.params.id[1]);
+router.delete('/courses/:cid/students/:sid', function(req, res, next) {
+    config.Partition('courses');
+	var server = config.find('students', req.params.sid[1]);
     var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0],serverlist[1]);
+    sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
+    '/students/'+req.params.sid+'/courses/'+req.params.cid,
+    function(data){
+        var jsonObj=JSON.parse(data);
+        if ("RET" in jsonObj && jsonObj["RET"]==200) {
+            server = config.find('courses', req.body.courses[1]);
+            serverlist = server.split(':');
+            sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
+            '/courses/'+req.params.cid+'/students/'+req.params.sid,
+            function(data1){
+                var jsonObj1=JSON.parse(data1);
+                if ("RET" in jsonObj1 && jsonObj["RET"]==200) {
+                    res.send(JSON.stringify({ RET:200,status:"success" }));
+                }
+                else {
+                    sign.findSpecific(req, res, serverlist[0], serverlist[1], 'POST', 
+                    '/students/'+req.params.sid+'/courses/'+req.params.cid,
+                    function(newdata){
+                        res.send(data1);
+                    });
+                }
+            });
+            
+        }
+        else {
+            res.send(data);
+        }
+    });
 });
 
-router.put('/deleteStudentFromCourse/:key', function(req, res, next) {
-	if (req.params.key != 'teacher'){
-		res.send(JSON.stringify({ RET:500,status:"Must have teacher permission" }));
-		return;
-	}
-    var server = config.find('students', req.body.stu[1]);
-    var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], 
-	'/deleteCourseFromStudent/'+req.body.stu+'/'+req.params.key,
-	function(data){
-		var jsonObj=JSON.parse(data);
-		if ("RET" in jsonObj && jsonObj["RET"]==200) {
-		console.log('seccess in part 1');
-			server = config.find('courses', req.body.courses[1]);
-			serverlist = server.split(':');
-			sign.findSpecific(req, res, serverlist[0], serverlist[1],
-			'/deleteStudentFromCourse/'+req.body.courses+'/'+req.params.key,
-			function(data1){
-				var jsonObj1=JSON.parse(data1);
-				if ("RET" in jsonObj1 && jsonObj["RET"]==200) {
-					res.send(JSON.stringify({ RET:200,status:"success" }));
-				}
-				else {
-				    sign.findSpecific(req, res, serverlist[0], serverlist[1], 
-					'/addCourseToStudent/'+req.body.stu+'/'+req.params.key,
-					function(newdata){
-						res.send(data1);
-					});
-				}
-			});
-			
-		}
-		else {
-			res.send(data);
-		}
-	});
+router.post('/servers', function(req, res, next) {
+    config.Partition('courses');
+    if(req.body.category==null || req.body.server==null) {
+        res.send(JSON.stringify({ RET:400,status:"Wrong JSON format, must have category and server parameters." }));
+        return;
+    }
+    config.addServer(req.body.category, req.body.server);
+    res.send(JSON.stringify({ RET:200,status:"Success" }));
 });
 
 router.get('/students', function(req, res, next) {
+    config.Partition('courses');
     var outputs = [];
     var count = 0;
     var servers = config.getServerList('students');
@@ -168,38 +161,30 @@ router.get('/students', function(req, res, next) {
     }
 });
 
+
 router.get('/students/:id', function(req, res, next) {
-    console.log('haha');
+    config.Partition('courses');
     var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.post('/student/:key', function(req, res, next) {
-	if (req.params.key != 'student'){
-		res.send(JSON.stringify({ RET:500,status:"Must have student permission" }));
-		return;
-	}
+router.post('/students', function(req, res, next) {
+    config.Partition('courses');
     var server = config.find('students', req.body.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.put('/student/:id/:key', function(req, res, next) {
-	if (req.params.key != 'student'){
-		res.send(JSON.stringify({ RET:500,status:"Must have student permission" }));
-		return;
-	}
+router.put('/students/:id', function(req, res, next) {
+    config.Partition('courses');
     var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
-router.delete('/student/:id/:key', function(req, res, next) {
-	if (req.params.key != 'student'){
-		res.send(JSON.stringify({ RET:500,status:"Must have student permission" }));
-		return;
-	}
+router.delete('/students/:id/', function(req, res, next) {
+    config.Partition('courses');
     var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
@@ -211,72 +196,47 @@ router.delete('/student/:id/:key', function(req, res, next) {
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });*/
 //DataModel change & Partition
-router.put('/addStudentAttribute/:key', function(req, res, next) {
-	if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
-	var attributeToadd = req.body.attribute;
-    var output = '';
+router.post('/students/models', function(req, res, next) {
+    config.Partition('courses');
     var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/addStudentAttribute/'+req.params.key);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.put('/deleteStudentAttribute/:key', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
-	var output = '';
-    var servers = config.getServerList('students');
+router.delete('/students/models', function(req, res, next) {
+    config.Partition('courses');
+	var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/deleteStudentAttribute/'+req.params.key);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
-router.put('/addCourseAttribute/:key', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
-    var output = '';
+router.post('/courses/models', function(req, res, next) {
+    config.Partition('courses');
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/addCourseAttribute/'+req.params.key);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.put('/deleteCourseAttribute/:key', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
-    var output = '';
+router.delete('/courses/models', function(req, res, next) {
+    config.Partition('courses');
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/deleteCourseAttribute/'+req.params.key);
+        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.get('/studentsPartition', function(req, res, next) {
-	var servers = config.getServerParitition('students');
-    res.send(servers);
-});
 
-router.post('/studentsPartition/:splitChars/:key', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
+/*router.post('/studentsPartition/:splitChars', function(req, res, next) {
 	var servers = config.getServerParitition('students');
     var splitChars = req.params.splitChars;
     var num = servers.length;
@@ -294,7 +254,7 @@ router.post('/studentsPartition/:splitChars/:key', function(req, res, next) {
         for(var index = 0; index < studentservers.length; index++) {
             var serverlist = studentservers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
-                '/student/repartition/'+req.params.key,
+                '/students/repartition',
                 splitChars[index*2],splitChars[index*2+1],function(data){
                     var jsonObj=JSON.parse(data);
                     console.log(JSON.stringify(jsonObj));
@@ -302,7 +262,7 @@ router.post('/studentsPartition/:splitChars/:key', function(req, res, next) {
                         var record=jsonObj[i];
                         var server = config.find('students', record.id[1]);
                         var serverlist2 = server.split(':');
-                        sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/student/teacher',record);
+                        sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/students',record);
                     }
                 });
         }
@@ -311,19 +271,11 @@ router.post('/studentsPartition/:splitChars/:key', function(req, res, next) {
 });
 
 router.get('/coursesPartition', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
 	var servers = config.getServerParitition('courses');
     res.send(servers);
 });
 
-router.post('/coursesPartition/:splitChars/:key', function(req, res, next) {
-    if (req.params.key != 'root'){
-		res.send(JSON.stringify({ RET:500,status:"Must have root permission" }));
-		return;
-	}
+router.post('/coursesPartition/:splitChars', function(req, res, next) {
 	var servers = config.getServerParitition('courses');
     var splitChars = req.params.splitChars;
     var num = servers.length;
@@ -342,19 +294,20 @@ router.post('/coursesPartition/:splitChars/:key', function(req, res, next) {
         for(var index = 0; index <courseservers.length; index++) {
             var serverlist = courseservers[index].split(':');
             sign.findforPartition(req, res, serverlist[0], serverlist[1],
-                '/course/repartition/'+req.params.key,
-                splitChars[index*2],splitChars[index*21],function(data){
+                '/courses/repartition',
+                splitChars[index*2],splitChars[index*2+1],function(data){
                 var jsonObj=JSON.parse(data);
                 for(var i=0,size=jsonObj.length;i<size;i++){
                     var record=jsonObj[i];
                     var server = config.find('courses', record.id[1]);
+                    console.log(record);
                     var serverlist2 = server.split(':');                   
-                    sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/course/teacher',record);
+                    sign.findforResendData(req, res, serverlist2[0], serverlist2[1],'/s',record);
                 }
             });
         }
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
-});
+});*/
 module.exports = router;
 

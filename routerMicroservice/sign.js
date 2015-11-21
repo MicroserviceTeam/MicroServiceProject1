@@ -88,7 +88,7 @@ exports.finds = function(req,res,thost,tport) {
     req.write(contentStr);
     req.end();
 }
-exports.findSpecific = function(req,res,thost,tport,tpath,success) {
+exports.findSpecific = function(req,res,thost,tport,tmethod, tpath,success) {
 
     var bodyQueryStr = req.body;
     console.log(bodyQueryStr);
@@ -102,7 +102,7 @@ exports.findSpecific = function(req,res,thost,tport,tpath,success) {
         host: thost,
         port: tport,
         path: '/api'+tpath,
-        method: req.method,
+        method: tmethod,
         headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Content-Length': contentLen
