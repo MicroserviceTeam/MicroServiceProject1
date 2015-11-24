@@ -119,15 +119,17 @@ exports.Partition = function(category) {
             if (category == record['category'] ) {
                 server = record['server'];
                 var serverlist = server.split(':');
+                console.log('serverlist: '+serverlist);
                 sign.findforPartition(serverlist[0], serverlist[1],
-                '/'+category+'/repartition',
+                '/'+category+'/partitions',
                 record['start'],record['end'],function(data){
+                    console.log('data: '+data);
                     var jsonObj1=JSON.parse(data);
                     for(var i=0,size=jsonObj1.length;i<size;i++){
                         var record1=jsonObj1[i];
                         var server = exports.find(category, record1.id[1]);
                         var serverlist2 = server.split(':');                   
-                        sign.findforResendData(serverlist2[0], serverlist2[1],'/courses',record1);
+                        sign.findforResendData(serverlist2[0], serverlist2[1],'/'+category,record1);
                     }
                 });
             }

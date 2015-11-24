@@ -337,7 +337,7 @@ router.delete('/students/models', function(req, res, next) {
 });
 
 //data repartition
-router.put('/api/studens/partitions', function (req, res, next) {
+router.put('/api/students/partitions', function (req, res, next) {
 	var result = [];
 	var newS = req.body.newStart.toLowerCase();
 	var newE = req.body.newEnd.toLowerCase();
