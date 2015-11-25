@@ -104,7 +104,7 @@ function compareObject(o1,o2){
   }
 }
 
-exports.Partition = function(category) {
+exports.Partition = function() {
     data = fs.readFileSync(configFile);
     real_data = fs.readFileSync(configinUse);
     var jsonObj=JSON.parse(data);
@@ -116,23 +116,21 @@ exports.Partition = function(category) {
         }*/);
         for(var index = 0; index <jsonObj.length; index++) {
             var record=jsonObj[index];
-            if (category == record['category'] ) {
                 server = record['server'];
                 var serverlist = server.split(':');
                 console.log('serverlist: '+serverlist);
                 sign.findforPartition(serverlist[0], serverlist[1],
-                '/'+category+'/partitions',
+                '/'+record['category']+'/partitions',
                 record['start'],record['end'],function(data){
                     console.log('data: '+data);
                     var jsonObj1=JSON.parse(data);
                     for(var i=0,size=jsonObj1.length;i<size;i++){
                         var record1=jsonObj1[i];
-                        var server = exports.find(category, record1.id[1]);
+                        var server = exports.find(record['category'], record1.id[1]);
                         var serverlist2 = server.split(':');                   
-                        sign.findforResendData(serverlist2[0], serverlist2[1],'/'+category,record1);
+                        sign.findforResendData(serverlist2[0], serverlist2[1],'/'+record['category'],record1);
                     }
                 });
-            }
         }
     }
 }

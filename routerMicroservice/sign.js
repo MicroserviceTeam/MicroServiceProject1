@@ -216,7 +216,7 @@ exports.findwithCallback = function(req,res,thost,tport,success) {
     req.end();
 }
 
-exports.findforPartition = function(req,res,thost,tport,tpath,newStart,newEnd,success) {
+exports.findforPartition = function(thost,tport,tpath,newStart,newEnd,success) {
 
     var contentStr = querystring.stringify({
         'newStart': newStart,
@@ -259,7 +259,7 @@ exports.findforPartition = function(req,res,thost,tport,tpath,newStart,newEnd,su
     req.end();
 }
 
-exports.findforResendData = function(req,res,thost,tport,tpath,sendBody) {
+exports.findforResendData = function(thost,tport,tpath,sendBody) {
 
     var bodyQueryStr = sendBody;
     console.log(bodyQueryStr);

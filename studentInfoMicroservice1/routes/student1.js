@@ -215,6 +215,7 @@ router.post('/students/:sid/courses/:cid', function (req, res, next) {
     }
 
     findCourse(function (oriCourses) {
+        console.log(oriCourses);
         for (var i in addedCourses) {
             if (oriCourses.indexOf(addedCourses[i]) == -1)
                 oriCourses.push(addedCourses[i]);
@@ -340,7 +341,7 @@ router.delete('/students/models', function(req, res, next) {
 });
 
 //data repartition
-router.put('/students/partitions', function (req, res, next) {
+router.post('/students/partitions', function (req, res, next) {
     var result = [];
     var newS = req.body.newStart.toLowerCase();
     var newE = req.body.newEnd.toLowerCase();
