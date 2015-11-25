@@ -53,7 +53,7 @@ router.post('/courses', function(req, res, next) {
 });
 
 router.post('/courses/:cid/students/:sid', function(req, res, next) {
-    config.Partition();
+    //config.Partition();
     var server = config.find('students', req.params.sid[1]);
     var serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,

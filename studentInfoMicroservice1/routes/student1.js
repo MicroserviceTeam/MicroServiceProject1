@@ -156,7 +156,7 @@ router.get('/students', function(req, res, next) {
 //delete a student by id
 router.delete('/students/:sid', function (req, res, next) {
     originData = '';
-    
+
     db.collection(collectionName).find({"id": req.params.sid}).toArray(function (err, result) {
         if (err) {
             originData = "None.";
@@ -191,7 +191,9 @@ router.delete('/students/:sid', function (req, res, next) {
 
 //add courses to students
 router.post('/students/:sid/courses/:cid', function (req, res, next) {
+
     var addedCourses = req.params.cid;
+    console.log(addedCourses);
     if (req.params.sid == null || addedCourses == null) {
         res.send(JSON.stringify({RET: 402, status: "wrong JSON format"}));
         return;
