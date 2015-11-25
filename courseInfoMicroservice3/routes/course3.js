@@ -201,7 +201,7 @@ router.delete('/courses/:cid', function (req, res, next) {
 
 //add students to courses
 router.post('/courses/:cid/students/:sid', function(req, res, next) {
-	var addedStudents = req.body.sid;
+	var addedStudents = req.params.sid;
 	console.log(addedStudents);
 	if (req.params.cid == null || addedStudents == null) {
 		res.send(JSON.stringify({RET: 402, status: "wrong JSON format"}));
