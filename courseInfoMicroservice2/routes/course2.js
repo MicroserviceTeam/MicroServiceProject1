@@ -347,7 +347,7 @@ router.delete('/courses/models', function(req, res, next) {
 });
 
 //data partition
-router.put('/courses/partitions', function (req, res, next) {
+router.post('/courses/partitions', function (req, res, next) {
 	var result = [];
 	var newS = req.body.newStart.toLowerCase();
 	var newE = req.body.newEnd.toLowerCase();

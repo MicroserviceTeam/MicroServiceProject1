@@ -156,6 +156,7 @@ router.get('/students', function(req, res, next) {
 //delete a student by id
 router.delete('/students/:sid', function (req, res, next) {
     originData = '';
+    
     db.collection(collectionName).find({"id": req.params.sid}).toArray(function (err, result) {
         if (err) {
             originData = "None.";
@@ -337,7 +338,7 @@ router.delete('/students/models', function(req, res, next) {
 });
 
 //data repartition
-router.put('/api/students/partitions', function (req, res, next) {
+router.put('/students/partitions', function (req, res, next) {
     var result = [];
     var newS = req.body.newStart.toLowerCase();
     var newE = req.body.newEnd.toLowerCase();

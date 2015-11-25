@@ -5,7 +5,7 @@ var config = require('../config');
 var mongo = require('mongoskin');
 
 router.get('/courses', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var outputs = [];
     var count = 0;
     var servers = config.getServerList('courses');
@@ -26,14 +26,14 @@ router.get('/courses', function(req, res, next) {
 });
 
 router.get('/courses/:id', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
 router.put('/courses/:id', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('courses', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0], serverlist[1]);
@@ -46,14 +46,14 @@ router.put('/courses/:id', function(req, res, next) {
 });*/
 
 router.post('/courses', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('courses', req.body.id[1]);
     var serverlist = server.split(':');
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });
 
 router.post('/courses/:cid/students/:sid', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('students', req.params.sid[1]);
     var serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
@@ -87,14 +87,24 @@ router.post('/courses/:cid/students/:sid', function(req, res, next) {
 });
 
 router.delete('/courses/:id', function(req, res, next) {
-    config.Partition('courses');
-    var server = config.find('courses', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0],serverlist[1]);
+    if(req.params.id=='models'){
+        config.Partition();
+        var servers = config.getServerList('courses');
+        for(var index = 0; index < servers.length; index++) {
+            var serverlist = servers[index].split(':');
+            sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
+        }
+        res.send(JSON.stringify({ RET:200,status:"success" }));
+    }else{
+        config.Partition();
+        var server = config.find('courses', req.params.id[1]);
+        var serverlist = server.split(':');
+        sign.finds(req,res,serverlist[0],serverlist[1]);
+    }
 });
 
 router.delete('/courses/:cid/students/:sid', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
 	var server = config.find('students', req.params.sid[1]);
     var serverlist = server.split(':');
     sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
@@ -128,7 +138,7 @@ router.delete('/courses/:cid/students/:sid', function(req, res, next) {
 });
 
 router.post('/servers', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     if(req.body.category==null || req.body.server==null) {
         res.send(JSON.stringify({ RET:400,status:"Wrong JSON format, must have category and server parameters." }));
         return;
@@ -138,7 +148,7 @@ router.post('/servers', function(req, res, next) {
 });
 
 router.get('/students', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var outputs = [];
     var count = 0;
     var servers = config.getServerList('students');
@@ -163,31 +173,41 @@ router.get('/students', function(req, res, next) {
 
 
 router.get('/students/:id', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
 router.post('/students', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('students', req.body.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
 router.put('/students/:id', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var server = config.find('students', req.params.id[1]);
     var serverlist = server.split(':');
     sign.finds(req, res, serverlist[0], serverlist[1]);
 });
 
 router.delete('/students/:id/', function(req, res, next) {
-    config.Partition('courses');
-    var server = config.find('students', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req, res, serverlist[0], serverlist[1]);
+    if(req.params.id=='models'){
+        config.Partition();
+        var servers = config.getServerList('students');
+        for(var index = 0; index < servers.length; index++) {
+            var serverlist = servers[index].split(':');
+            sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
+        }
+        res.send(JSON.stringify({ RET:200,status:"success" }));
+    }else{
+        config.Partition();
+        var server = config.find('students', req.params.id[1]);
+        var serverlist = server.split(':');
+        sign.finds(req, res, serverlist[0], serverlist[1]);
+    }
 });
 
 /*router.post('/findStudents', function(req, res, next) {
@@ -197,7 +217,7 @@ router.delete('/students/:id/', function(req, res, next) {
 });*/
 //DataModel change & Partition
 router.post('/students/models', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
@@ -206,17 +226,17 @@ router.post('/students/models', function(req, res, next) {
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.delete('/students/models', function(req, res, next) {
-    config.Partition('courses');
+/*router.delete('/students/models', function(req, res, next) {
+    config.Partition();
 	var servers = config.getServerList('students');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
         sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
-});
+});*/
 router.post('/courses/models', function(req, res, next) {
-    config.Partition('courses');
+    config.Partition();
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
@@ -225,15 +245,15 @@ router.post('/courses/models', function(req, res, next) {
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });
 
-router.delete('/courses/models', function(req, res, next) {
-    config.Partition('courses');
+/*router.delete('/courses/models', function(req, res, next) {
+    config.Partition();
     var servers = config.getServerList('courses');
     for(var index = 0; index < servers.length; index++) {
         var serverlist = servers[index].split(':');
         sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
-});
+});*/
 
 
 /*router.post('/studentsPartition/:splitChars', function(req, res, next) {
