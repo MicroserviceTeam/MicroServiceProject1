@@ -3,40 +3,19 @@ var router = express.Router();
 var sign = require('../sign');
 var config = require('../config');
 var mongo = require('mongoskin');
+var APIGatewayHost = 'localhost'
+var APIGatewayPort = '3007'
 
 router.get('/courses', function(req, res, next) {
-    config.Partition();
-    var outputs = [];
-    var count = 0;
-    var servers = config.getServerList('courses');
-    for(var index = 0; index < servers.length; index++) {
-        var serverlist = servers[index].split(':');
-        sign.findwithCallback(req, res, serverlist[0], serverlist[1],
-        function(data){
-            jsonObj = JSON.parse(data);
-            for(var i=0,size=jsonObj.length;i<size;i++){
-                var record=jsonObj[i];
-                outputs.push(record);
-            }
-            count++;
-            if (count == servers.length)
-                res.send(JSON.stringify(outputs));
-        });
-    }
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.get('/courses/:id', function(req, res, next) {
-    config.Partition();
-    var server = config.find('courses', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.put('/courses/:id', function(req, res, next) {
-    config.Partition();
-    var server = config.find('courses', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0], serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 /*router.post('/findCourses', function(req, res, next) {
@@ -46,168 +25,44 @@ router.put('/courses/:id', function(req, res, next) {
 });*/
 
 router.post('/courses', function(req, res, next) {
-    config.Partition();
-    var server = config.find('courses', req.body.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0],serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.post('/courses/:cid/students/:sid', function(req, res, next) {
-    //config.Partition();
-    var server = config.find('students', req.params.sid[1]);
-    var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
-	'/students/'+req.params.sid+'/courses/'+req.params.cid,
-	function(data){
-		var jsonObj=JSON.parse(data);
-		if ("RET" in jsonObj && jsonObj["RET"]==200) {
-			server = config.find('courses', req.params.cid[1]);
-			serverlist = server.split(':');
-			sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
-			'/courses/'+req.params.cid+'/students/'+req.params.sid,
-			function(data1){
-				var jsonObj1=JSON.parse(data1);
-				if ("RET" in jsonObj1 && jsonObj["RET"]==200) {
-					res.send(JSON.stringify({ RET:200,status:"success" }));
-				}
-				else {
-					sign.findSpecific(req, res, serverlist[0], serverlist[1], 'DELETE', 
-					'/students/'+req.params.sid+'/courses/'+req.params.cid,
-					function(newdata){
-						res.send(data1);
-					});
-				}
-			});
-			
-		}
-		else {
-			res.send(data);
-		}
-	});
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.delete('/courses/:id', function(req, res, next) {
-    if(req.params.id=='models'){
-        config.Partition();
-        var servers = config.getServerList('courses');
-        for(var index = 0; index < servers.length; index++) {
-            var serverlist = servers[index].split(':');
-            sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
-        }
-        res.send(JSON.stringify({ RET:200,status:"success" }));
-    }else{
-        config.Partition();
-        var server = config.find('courses', req.params.id[1]);
-        var serverlist = server.split(':');
-        sign.finds(req,res,serverlist[0],serverlist[1]);
-    }
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.delete('/courses/:cid/students/:sid', function(req, res, next) {
-    config.Partition();
-	var server = config.find('students', req.params.sid[1]);
-    var serverlist = server.split(':');
-    sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
-    '/students/'+req.params.sid+'/courses/'+req.params.cid,
-    function(data){
-        var jsonObj=JSON.parse(data);
-        if ("RET" in jsonObj && jsonObj["RET"]==200) {
-            server = config.find('courses', req.body.courses[1]);
-            serverlist = server.split(':');
-            sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
-            '/courses/'+req.params.cid+'/students/'+req.params.sid,
-            function(data1){
-                var jsonObj1=JSON.parse(data1);
-                if ("RET" in jsonObj1 && jsonObj["RET"]==200) {
-                    res.send(JSON.stringify({ RET:200,status:"success" }));
-                }
-                else {
-                    sign.findSpecific(req, res, serverlist[0], serverlist[1], 'POST', 
-                    '/students/'+req.params.sid+'/courses/'+req.params.cid,
-                    function(newdata){
-                        res.send(data1);
-                    });
-                }
-            });
-            
-        }
-        else {
-            res.send(data);
-        }
-    });
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.post('/servers', function(req, res, next) {
-    config.Partition();
-    if(req.body.category==null || req.body.server==null) {
-        res.send(JSON.stringify({ RET:400,status:"Wrong JSON format, must have category and server parameters." }));
-        return;
-    }
-    config.addServer(req.body.category, req.body.server);
-    res.send(JSON.stringify({ RET:200,status:"Success" }));
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.get('/students', function(req, res, next) {
-    config.Partition();
-    var outputs = [];
-    var count = 0;
-    var servers = config.getServerList('students');
-    console.log(servers);
-    for(var index = 0; index < servers.length; index++) {
-        var serverlist = servers[index].split(':');
-        sign.findwithCallback(req, res, serverlist[0], serverlist[1],
-        function(data){
-            jsonObj = JSON.parse(data);
-            for(var i=0,size=jsonObj.length;i<size;i++){
-                var record=jsonObj[i];
-                outputs.push(record);
-            }
-            count++;
-            console.log(count);
-            console.log('outputs: '+JSON.stringify(outputs));
-            if (count == servers.length)
-                res.send(JSON.stringify(outputs));
-        });
-    }
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 
 router.get('/students/:id', function(req, res, next) {
-    config.Partition();
-    var server = config.find('students', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.post('/students', function(req, res, next) {
-    config.Partition();
-    var server = config.find('students', req.body.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.put('/students/:id', function(req, res, next) {
-    config.Partition();
-    var server = config.find('students', req.params.id[1]);
-    var serverlist = server.split(':');
-    sign.finds(req, res, serverlist[0], serverlist[1]);
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 router.delete('/students/:id/', function(req, res, next) {
-    if(req.params.id=='models'){
-        config.Partition();
-        var servers = config.getServerList('students');
-        for(var index = 0; index < servers.length; index++) {
-            var serverlist = servers[index].split(':');
-            sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
-        }
-        res.send(JSON.stringify({ RET:200,status:"success" }));
-    }else{
-        config.Partition();
-        var server = config.find('students', req.params.id[1]);
-        var serverlist = server.split(':');
-        sign.finds(req, res, serverlist[0], serverlist[1]);
-    }
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 /*router.post('/findStudents', function(req, res, next) {
@@ -217,13 +72,7 @@ router.delete('/students/:id/', function(req, res, next) {
 });*/
 //DataModel change & Partition
 router.post('/students/models', function(req, res, next) {
-    config.Partition();
-    var servers = config.getServerList('students');
-    for(var index = 0; index < servers.length; index++) {
-        var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/students/models');
-    }
-    res.send(JSON.stringify({ RET:200,status:"success" }));
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 /*router.delete('/students/models', function(req, res, next) {
@@ -236,13 +85,7 @@ router.post('/students/models', function(req, res, next) {
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });*/
 router.post('/courses/models', function(req, res, next) {
-    config.Partition();
-    var servers = config.getServerList('courses');
-    for(var index = 0; index < servers.length; index++) {
-        var serverlist = servers[index].split(':');
-        sign.findforDataModel(req, res, serverlist[0], serverlist[1], '/courses/models');
-    }
-    res.send(JSON.stringify({ RET:200,status:"success" }));
+    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
 });
 
 /*router.delete('/courses/models', function(req, res, next) {

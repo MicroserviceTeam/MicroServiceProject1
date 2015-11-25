@@ -155,42 +155,53 @@ router.get('/students', function(req, res, next) {
 
 //delete a student by id
 router.delete('/students/:sid', function (req, res, next) {
-    originData = '';
-    db.collection(collectionName).find({"id": req.params.sid}).toArray(function (err, result) {
-        if (err) {
-            originData = "None.";
-        } else if (result.length == 0) {
-            originData = "None.";
-        }
-        else {
-            originData = result;
-        }
-    });
-    db.collection(collectionName).remove({"id": req.params.sid}, function (err, result) {
-        if (err) {
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 500, status: "internal error"}));
-        }
-        else if (result == 0) {
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 400, status: "student not found"}));
-        }
-        else {
-            logs = JSON.stringify({id:req.params.sid,oldData:JSON.stringify(originData),newData:"None",version:getDateTime()});
-            fs.appendFile(logFile, logs+"\n",
-                function(err) {
-                    if(err) throw err;
+    if (req.params.sid == 'models') {
+        deleteDataModel(req, res, next);
+    }
+    else {
+        originData = '';
+        db.collection(collectionName).find({"id": req.params.sid}).toArray(function (err, result) {
+            if (err) {
+                originData = "None.";
+            } else if (result.length == 0) {
+                originData = "None.";
+            }
+            else {
+                originData = result;
+            }
+        });
+        db.collection(collectionName).remove({"id": req.params.sid}, function (err, result) {
+            if (err) {
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 500, status: "internal error"}));
+            }
+            else if (result == 0) {
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 400, status: "student not found"}));
+            }
+            else {
+                logs = JSON.stringify({
+                    id: req.params.sid,
+                    oldData: JSON.stringify(originData),
+                    newData: "None",
+                    version: getDateTime()
                 });
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 200, status: "success"}));
-        }
-    });
+                fs.appendFile(logFile, logs + "\n",
+                    function (err) {
+                        if (err) throw err;
+                    });
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 200, status: "success"}));
+            }
+        });
+    }
 });
 
 
 //add courses to students
 router.post('/students/:sid/courses/:cid', function (req, res, next) {
     var addedCourses = req.params.cid;
+    console.log(addedCourses);
     if (req.params.sid == null || addedCourses == null) {
         res.send(JSON.stringify({RET: 402, status: "wrong JSON format"}));
         return;
@@ -212,10 +223,8 @@ router.post('/students/:sid/courses/:cid', function (req, res, next) {
     }
 
     findCourse(function (oriCourses) {
-        for (var i in addedCourses) {
-            if (oriCourses.indexOf(addedCourses[i]) == -1)
-                oriCourses.push(addedCourses[i]);
-        }
+        if (oriCourses.indexOf(addedCourses) == -1)
+            oriCourses.push(addedCourses);
         db.collection(collectionName).update(
             {"id": req.params.sid},
             {
@@ -266,11 +275,9 @@ router.delete('/students/:sid/courses/:cid', function (req, res, next) {
     }
 
     findCourse(function (oriCourses) {
-        for (var i in delCourses) {
-            var index = oriCourses.indexOf(delCourses[i]);
-            if (index != -1)
-                oriCourses.splice(index, 1);
-        }
+        var index = oriCourses.indexOf(delCourses);
+        if (index != -1)
+            oriCourses.splice(index, 1);
         db.collection(collectionName).update({"id": req.params.sid},
             {
                 $set: {
@@ -316,25 +323,26 @@ router.post('/students/models', function(req, res, next) {
 });
 
 //delete data model
-router.delete('/students/models', function(req, res, next) {
+
+function deleteDataModel(req, res, next) {
     var body = req.body;
     body["lastModifiedTime"] = getDateTime();
     db.collection(collectionName).update(
         {},
         {$unset: body},
-        {upsert:false, multi:true},
-        function(err, result) {
+        {upsert: false, multi: true},
+        function (err, result) {
             if (err) {
                 res.contentType('json');
-                res.send(JSON.stringify({ RET:500,status:"internal error" }));
+                res.send(JSON.stringify({RET: 500, status: "internal error"}));
             }
             else {
                 res.contentType('json');
-                res.send(JSON.stringify({ RET:200,status:"success"}));
+                res.send(JSON.stringify({RET: 200, status: "success"}));
             }
         }
     );
-});
+}
 
 //data repartition
 router.post('/students/partitions', function (req, res, next) {
