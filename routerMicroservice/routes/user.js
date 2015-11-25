@@ -61,7 +61,7 @@ router.post('/courses/:cid/students/:sid', function(req, res, next) {
 	function(data){
 		var jsonObj=JSON.parse(data);
 		if ("RET" in jsonObj && jsonObj["RET"]==200) {
-			server = config.find('courses', req.body.courses[1]);
+			server = config.find('courses', req.params.cid[1]);
 			serverlist = server.split(':');
 			sign.findSpecific(req, res, serverlist[0], serverlist[1], req.method,
 			'/courses/'+req.params.cid+'/students/'+req.params.sid,
